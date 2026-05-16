@@ -2,48 +2,55 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    protected $primaryKey = 'id_pengguna';
+
     protected $fillable = [
-        'name',
         'email',
+        'nama_pengguna',
+        'no_hp',
         'password',
+        'profil_foto',
+        'role',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
+    protected $appends = [
+        'url_profil_foto',
+    ];
+
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function pesanan()
+    {
+        return $this->hasMany(
+            Pesanan::class,
+            'id_pengguna',
+            'id_pengguna'
+        );
+    }
+
+    public function getUrlProfilFotoAttribute()
+    {
+        return $this->profil_foto
+            ? asset('storage/' . $this->profil_foto)
+            : null;
     }
 }
